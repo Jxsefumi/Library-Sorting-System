@@ -44,6 +44,9 @@ def returnBook(cursor, con, book_id): #Mein gott, das ist verständlich!
 
 def main(): #YAY we got here, basically here where the magic begins *wink wink
     print("\033[1mWelcome to Library Sorting System\033[0m".center(100, "="))
+
+    PrevSortOrder = None
+    PrevSortBy = None
     
     # user_name = input("Enter your name: ") // I commented these lines of codes, Weil ich zu faul bin, das zu machen. 
     # user_id = user_name + "_ID" // the purpose of this should show the name of the person who borrows the book, aber ich bin kein Deutscher.
@@ -89,12 +92,17 @@ def main(): #YAY we got here, basically here where the magic begins *wink wink
             cursor.execute("SELECT * FROM books WHERE id = %s", (book_id,))
             book = cursor.fetchone()
             if book:
-                confirmation = input(f"Are you sure you want to delete '{book[1]}'? (Yes/No): ")
-                if confirmation.lower() == "yes":
-                    deleteBook(cursor, con, book_id)
-                    print(f"Book '{book[1]}' deleted successfully.")
-                else:
-                    print("Delete action cancelled.")
+                while True:
+                    confirmation = input(f"Are you sure you want to delete '{book[1]}'? (Y/N): ")
+                    if confirmation.upper() == "Y":
+                        deleteBook(cursor, con, book_id)
+                        print(f"Book '{book[1]}' deleted successfully.")
+                        break
+                    elif confirmation.upper() == "N":
+                        print("Delete Action Cancelled")
+                        break
+                    else:
+                        print("Unavailable option. Please enter 'Y' for Yes or 'N' for No.")
             else:
                 print("Book not found.")
 
@@ -113,16 +121,22 @@ def main(): #YAY we got here, basically here where the magic begins *wink wink
                 print("Invalid sort order. Please enter either 'ASC' or 'DESC'.")
 
             if sort_choice == "1":
-                showBooks(cursor, sort_order, "name")
+                # showBooks(cursor, sort_order, "name")
+                PrevSortBy = "name"
             elif sort_choice == "2":
-                showBooks(cursor, sort_order, "author")
+                # showBooks(cursor, sort_order, "author")
+                PrevSortBy = "author"
             elif sort_choice == "3":
-                showBooks(cursor, sort_order, "category")
+                # showBooks(cursor, sort_order, "category")
+                PrevSortBy = "category"
             else:
                 print("Invalid choice.") #dang, imagine not being an option/choice
+                continue
+            PrevSortOrder = sort_order
+            showBooks(cursor, PrevSortOrder, PrevSortBy)
         
         elif action == "4":
-            showBooks(cursor) #ilabas niyo ang libro! 
+            showBooks(cursor, PrevSortOrder, PrevSortBy) #ilabas niyo ang libro! 
         
         elif action == "5": 
             book_id = int(input("Which book would you like to read? Enter book ID: "))
